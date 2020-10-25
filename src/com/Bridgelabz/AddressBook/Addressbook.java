@@ -8,6 +8,10 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.util.Scanner;
 import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 
 public class Addressbook {
 
@@ -35,6 +39,7 @@ public class Addressbook {
 		String addressBookName = null;
 		int end1 = 0;
 		System.out.println("WELCOME TO ADDRESS BOOK CODE");
+		int choice1 = 0;
 		while (end1 == 0) {
 			System.out.println("Select from the options below");
 			System.out.println("1.\tOPEN Address Book");
@@ -42,7 +47,7 @@ public class Addressbook {
 			System.out.println("3.\tDELETE An Address Book");
 			System.out.println("4.\tDELETE All Address Books");
 			System.out.println("5.\tEXIT");
-			int choice1 = sc.nextInt();
+			choice1 = sc.nextInt();
 			switch (choice1) {
 			case 1:
 				System.out.println("Enter Address Book Name You want to open");
@@ -58,8 +63,7 @@ public class Addressbook {
 
 			case 3:
 				System.out.println("Enter Address Book Name you want to DELETE");
-				addressBookName = sc.nextLine();
-				sc.nextLine();
+				addressBookName = sc.next();
 				deleteAddresssBook(addressBookName);
 				break;
 			case 4:
@@ -78,12 +82,40 @@ public class Addressbook {
 	}
 
 	private static void deleteAllAddressBook() {
-		System.out.println("delete All address book");
+
+		File directoryPath = new File(
+				"C:\\Users\\Saurabh\\eclipse-workspace\\AddressBookJava\\src\\com\\Bridgelabz\\AddressBook");
+		File[] files = directoryPath.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".txt");
+			}
+		});
+
+		for (File file : files) {
+
+			String fileName = file.getName();
+			File file1 = new File(
+					"C:\\Users\\Saurabh\\eclipse-workspace\\AddressBookJava\\src\\com\\Bridgelabz\\AddressBook\\"
+							+ fileName);
+			if (file1.delete()) {
+				System.out.println("File deleted successfully");
+			} else {
+				System.out.println("Failed to delete the file");
+			}
+		}
 	}
 
 	private static void deleteAddresssBook(String addressBookName) {
-		System.out.println("delete address book");
-
+		String fileName = addressBookName + ".txt";
+		File file = new File(
+				"C:\\Users\\Saurabh\\eclipse-workspace\\AddressBookJava\\src\\com\\Bridgelabz\\AddressBook\\"
+						+ fileName);
+		if (file.delete()) {
+			System.out.println("File deleted successfully");
+		} else {
+			System.out.println("Failed to delete the file");
+		}
 	}
 
 	private static void createAddresssBook(String addressBookName) {
@@ -110,7 +142,7 @@ public class Addressbook {
 			FileWriter myWriter = new FileWriter(
 					"C:\\Users\\Saurabh\\eclipse-workspace\\AddressBookJava\\src\\com\\Bridgelabz\\AddressBook\\"
 							+ fileName);
-			myWriter.write("First Name\t Last Name\t Address\t City\t State\t Zip\t Phone Number\t");
+			myWriter.write("First Name\tLast Name\tEmail\tAddress\tCity\tState\tZip\tPhone Number\t");
 			myWriter.close();
 			System.out.println("Successfully wrote to the file.");
 		} catch (IOException e) {
@@ -121,18 +153,8 @@ public class Addressbook {
 	}
 
 	public static void openAddressBook(String addressBookName) {
-
+		String phoneNumber = null;
 		String fileName = addressBookName + ".txt";
-//		BufferedReader r;
-//		try {
-//			r = new BufferedReader(new FileReader(
-//					"C:\\Users\\Saurabh\\eclipse-workspace\\AddressBookJava\\src\\com\\Bridgelabz\\AddressBook\\"
-//							+fileName));
-//			System.out.print(r);
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		}
-
 		BufferedReader r;
 		try {
 			r = new BufferedReader(new FileReader(
@@ -140,31 +162,36 @@ public class Addressbook {
 							+ fileName));
 			String s = "", line = null;
 			while ((line = r.readLine()) != null) {
-				s += line;
-				System.out.print(s);
+//				s += line;
+				System.out.println("\t\t" + line);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		System.out.println("\tEnter your choice");
-		System.out.println("1.\tAdd a record");
-		System.out.println("2.\tdelete a record");
-		System.out.println("2.\tsearch a record");
-		System.out.println("2.\tupdate a record");
-		System.out.println("2.\tEXIT");
+		System.out.println("\t\tEnter your choice");
+		System.out.println("1.\t\tAdd a record");
+		System.out.println("2.\t\tdelete a record");
+		System.out.println("3.\t\tsearch a record");
+		System.out.println("4.\t\tupdate a record");
+		System.out.println("5.\t\tEXIT");
 		Scanner scan = new Scanner(System.in);
 		int choice2 = scan.nextInt();
 		switch (choice2) {
 		case 1:
-			addARecord(addressBookName);
+			System.out.println("\tEnter your phone Number");
+			phoneNumber = scan.next();
+			addARecord(addressBookName, phoneNumber);
 			break;
 		case 2:
-			deleteARecord(addressBookName);
+			System.out.println("\tEnter your phone Number");
+			phoneNumber = scan.next();
+			deleteARecord(addressBookName, phoneNumber);
 			break;
 		case 3:
-			searchARecord(addressBookName);
+			System.out.println("\tEnter your phone Number");
+			phoneNumber = scan.next();
+			searchARecord(addressBookName, phoneNumber);
 			break;
 		case 4:
 			updateARecord(addressBookName);
@@ -173,22 +200,95 @@ public class Addressbook {
 	}
 
 	private static void updateARecord(String addressBookName) {
-		// TODO Auto-generated method stub
 
 	}
 
-	private static void searchARecord(String addressBookName) {
-		// TODO Auto-generated method stub
+	private static void searchARecord(String addressBookName, String phoneNumber) {
+
+		String fileName = addressBookName + ".txt";
+		File file = new File(
+				"C:\\Users\\Saurabh\\eclipse-workspace\\AddressBookJava\\src\\com\\Bridgelabz\\AddressBook\\"
+						+ fileName);
+		try {
+			Scanner scanner = new Scanner(file);
+			while (scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				int index = line.indexOf(phoneNumber);
+				if (index != -1) {
+					System.out.println(line);
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Error occured while processing the file");
+			e.printStackTrace();
+		}
 
 	}
 
-	public static void deleteARecord(String addressBookName) {
-		// TODO Auto-generated method stub
+	public static void deleteARecord(String addressBookName, String phoneNumber) {
+
+		String fileName = addressBookName + ".txt";
+		String dest = "Output.txt";
+		File file = new File(
+				"C:\\Users\\Saurabh\\eclipse-workspace\\AddressBookJava\\src\\com\\Bridgelabz\\AddressBook\\"
+						+ fileName);
+		
+		
+		try {
+			FileWriter myWriter = new FileWriter(
+					"C:\\Users\\Saurabh\\eclipse-workspace\\AddressBookJava\\src\\com\\Bridgelabz\\AddressBook\\"
+							+ dest,true);
+			Scanner scanner = new Scanner(file);
+			while (scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				int index = line.indexOf(phoneNumber);
+				
+				if (index != -1) {
+					
+				} else {
+					System.out.println(line);
+					myWriter.write("\n"+line);
+				}
+			}
+			myWriter.close();
+
+		} catch (Exception e) {
+			System.out.println("Error occured while processing the file");
+			e.printStackTrace();
+		}
 
 	}
 
-	public static void addARecord(String addressBookName) {
-		// TODO Auto-generated method stub
+	public static void addARecord(String addressBookName, String phoneNumber) {
+		String fileName = addressBookName + ".txt";
+		Scanner scan = new Scanner(System.in);
+		System.out.println("\n\tEnter your First Name");
+		String fName = scan.next();
+		System.out.println("\n\tEnter your Last Name");
+		String lName = scan.next();
+		System.out.println("\nEnter your Email Id");
+		String emailId = scan.next();
+		System.out.println("\n\tEnter your Address");
+		String Address = scan.next();
+		System.out.println("\n\tEnter your city");
+		String city = scan.next();
+		System.out.println("\n\tEnter your State");
+		String state = scan.next();
+		System.out.println("\n\tEnter your Zip");
+		int zip = scan.nextInt();
+
+		try {
+			FileWriter myWriter = new FileWriter(
+					"C:\\Users\\Saurabh\\eclipse-workspace\\AddressBookJava\\src\\com\\Bridgelabz\\AddressBook\\"
+							+ fileName,true);
+			myWriter.write("\n" + fName + "\t" + lName + "\t" + emailId + "\t" + Address + "\t" + city + "\t" + state
+					+ "\t" + zip + "\t" + phoneNumber + "\t");
+			myWriter.close();
+			System.out.println("Successfully wrote to the file.");
+		} catch (IOException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}
 
 	}
 }
